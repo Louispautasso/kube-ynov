@@ -6,6 +6,8 @@ Le repo de base et où tout se lance à la mano est ici : https://github.com/Lou
 
 Ce projet a été créer dans le but de fonctionner sur un Cluster Kubernetes. Ce cluster pourra être installer sur un cloud provider comme sur un cluster kube local.
 
+![alt text](https://github.com/Louispautasso/kube-ynov/blob/others/diagramme.png?raw=true)
+
 # Pour Tout installer
 
 ## Les pré-requis
