@@ -3,6 +3,7 @@
 Ce repo est la partie Helm pour avoir un déploiement plus simple et plus rapide
 
 Le repo de base et où tout se lance à la mano est ici : https://github.com/Louispautasso/kube-groupe4
+
 Ce projet a été créer dans le but de fonctionner sur un Cluster Kubernetes. Ce cluster pourra être installer sur un cloud provider comme sur un cluster kube local.
 
 # Pour Tout installer
@@ -82,16 +83,50 @@ helm install fluentd ./helm-charts/fluentd --namespace kube-logging
 
 ## Installation du certificat auto-signé
 
-
 ```bash
 kubectl create secret tls projet-1 --cert certificats/projet-1.crt --key certificats/projet-1.key
 ```
 
+# Pour les noobs
+# Quelques commandes
+Voir les releases qui tournent actuellement et les supprimer
+```bash
+helm list -A
+helm uninstall <release_name> -n <namespace>
+```
+
+Se connecter à son cluster Azure
+```bash
+az aks get-credentials --resource-group groupe4 --name clus4
+```
+
+Utilisation des contexts
+```bash
+kubectl config get-contexts
+kubectl config use-context
+```
+# Quelques liens
+Création de la partie monitoring des metrics avec Prometheus
+```bash
+https://medium.com/codex/setup-kuberhealthy-with-prometheus-and-grafana-on-minikube-b2f6da21dc2e
+```
+Création des sondes de vivacité et de préparation
+```bash
+https://linuxintosh.wordpress.com/2020/12/28/k8s-les-differents-types-de-sondes/
+```
+Création des règles d'affinités
+```bash
+https://docs.openshift.com/container-platform/3.6/admin_guide/scheduling/pod_affinity.html
+https://stackoverflow.com/questions/62292476/deployment-affinity
+```
+Création de la partie monitoring des logs avec EFK + pas mal de recherche pour des petits bug
+```bash
+https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes#step-2-%E2%80%94-creating-the-elasticsearch-statefulset
+```
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-Please make sure to update tests as appropriate.
+Florian Agnès and Louis Pauatasso les proprios.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+C'est à nous
