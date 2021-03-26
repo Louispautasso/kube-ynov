@@ -80,6 +80,13 @@ Puis on lance l'installation du Chart Helm de Fluentd dans le namespace kube-log
 helm install fluentd ./helm-charts/fluentd --namespace kube-logging
 ```
 
+## Installation du certificat auto-signé
+
+
+```bash
+kubectl create secret tls projet-1 --cert certificats/projet-1.crt --key certificats/projet-1.key
+```
+
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
