@@ -31,6 +31,12 @@ Puis on install le controller Ingress
 ```bash
 helm install nginx-ingress ingress-nginx/ingress-nginx --namespace ingress-projet
 ```
+
+Enfin, on clone le repo git et on se place dedans pour la suite
+```bash
+git clone git@github.com:Louispautasso/kube-ynov.git
+cd kube-ynov
+```
 ## Installation du projet
 
 On commence par créer son namespace
