@@ -1,61 +1,392 @@
+# Volume   # On reserve un espace de stockage de 2Gi nommé mysql-volume // Claim est une demande de reservation 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mssql-volume-claim
+  namespace: projet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+
+# RabbitMQ Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "project.fullname" . }}
+  name: rabbitmq-deployment
+  namespace: projet
   labels:
-    {{- include "project.labels" . | nindent 4 }}
+    app: rabbitmq
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: 1
   selector:
     matchLabels:
-      {{- include "project.selectorLabels" . | nindent 6 }}
+      app: rabbitmq
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "project.selectorLabels" . | nindent 8 }}
+        app: rabbitmq
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "project.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - image: rabbitmq:3-management
+          name: rabbitmq-container
           ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
+            - containerPort: 15672
+              name: rabbitmq-port
+            - containerPort: 5672
+              name: rabbitmq-port2
           readinessProbe:
-            httpGet:
-              path: /
-              port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
+            tcpSocket:
+              port: 15672
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 15672
+            initialDelaySeconds: 120
+            periodSeconds: 20
+#          resources:
+#            requests:
+#              memory: 300Mi
+#              cpu: 4m
+#            limits:
+#              memory: 800Mi
+#              cpu: 8m
+      restartPolicy: Always
+
+---
+
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: projet
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - image: redis
+          name: redis-container
+          ports:
+            - containerPort: 6379
+              name: redis-port
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 60
+            periodSeconds: 20
+#          resources:
+#            requests:
+#              memory: 100Mi
+#              cpu: 4m
+#            limits:
+#              memory: 800Mi
+#              cpu: 8m
+      restartPolicy: Always
+
+---
+
+# MsSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-deployment
+  namespace: projet
+  labels:
+    app: mssql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mssql
+  template:
+    metadata:
+      labels:
+        app: mssql
+    spec:
+      containers:
+        - image: groupe4ynov/mssql-linux:1.0
+          name: mssql-container
+          ports:
+            - containerPort: 1433
+              name: mssql-port
+          volumeMounts:
+          - name: mssql-volume
+            mountPath: /var/opt/mssql
+          readinessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 120
+            periodSeconds: 20
+#          resources:
+#            requests:
+#              memory: 1500Mi
+#              cpu: 170m
+#            limits:
+#              memory: 2500Mi
+#              cpu: 250m
+      volumes:
+      - name: mssql-volume
+        persistentVolumeClaim:
+          claimName: mssql-volume-claim
+      restartPolicy: Always
+
+---
+
+# WEB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webmvc-deployment
+  namespace: projet
+  labels:
+    app: webmvc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webmvc
+  template:
+    metadata:
+      labels:
+        app: webmvc
+    spec:
       affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - jobs
+                - applicants
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - image: groupe4ynov/web:1.2 
+          name: webmvc-container
+          ports:
+            - containerPort: 80
+              name: webmvc-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 20
+#          resources:
+#            requests:
+#              memory: 500Mi
+#              cpu: 4m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
+      restartPolicy: Always
+
+---
+
+# Applicant Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: applicants-deployment
+  namespace: projet
+  labels:
+    app: applicants
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: applicants
+  template:
+    metadata:
+      labels:
+        app: applicants
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - mssql
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - image: groupe4ynov/applicants.api:1.0
+          name: applicants-container
+          env:
+            - name: ConnectionString
+              value: Server=mssql-service;User=sa;Password=Pass@word;Database=dotnetgigs.applicants;
+            - name: HostRabbitmq
+              value: rabbitmq-service
+          ports:
+            - containerPort: 80
+              name: applicants-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 20
+#          resources:
+#            requests:
+#              memory: 200Mi
+#              cpu: 3m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
+      restartPolicy: Always
+
+---
+
+# Jobs Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobs-deployment
+  namespace: projet
+  labels:
+    app: jobs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobs
+  template:
+    metadata:
+      labels:
+        app: jobs
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - mssql
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - image: groupe4ynov/jobs.api:1.0
+          name: jobs-container
+          env:
+            - name: ConnectionString
+              value: Server=mssql-service;User=sa;Password=Pass@word;Database=dotnetgigs.jobs;
+            - name: HostRabbitmq
+              value: rabbitmq-service
+          ports:
+            - containerPort: 80
+              name: applicants-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 20
+#          resources:
+#            requests:
+#              memory: 200Mi
+#              cpu: 3m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
+      restartPolicy: Always
+
+---
+
+# Identity Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-deployment
+  namespace: projet
+  labels:
+    app: identity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity
+  template:
+    metadata:
+      labels:
+        app: identity
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - redis
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - image: groupe4ynov/identity.api:1.0
+          name: identity-container
+          env:
+            - name: RedisHost
+              value: redis-service:6379
+            - name: HostRabbitmq
+              value: rabbitmq-service
+          ports:
+            - containerPort: 80
+              name: identity-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 20
+#          resources:
+#            requests:
+#              memory: 200Mi
+#              cpu: 3m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
+      restartPolicy: Always

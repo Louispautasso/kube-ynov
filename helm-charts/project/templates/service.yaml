@@ -1,15 +1,120 @@
-apiVersion: v1
+# RabbitMQ Service
+apiVersion: v1  
 kind: Service
 metadata:
-  name: {{ include "project.fullname" . }}
-  labels:
-    {{- include "project.labels" . | nindent 4 }}
+  name: rabbitmq-service
+  namespace: projet
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
   selector:
-    {{- include "project.selectorLabels" . | nindent 4 }}
+    app: rabbitmq
+  ports:
+    - name: rabbitmq-port
+      port: 15672
+      targetPort: 15672
+    - name: rabbitmq-port2
+      port: 5672
+      targetPort: 5672
+  type: ClusterIP
+
+---
+
+# Redis Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: redis-service
+  namespace: projet
+spec:
+  selector:
+    app: redis
+  ports:
+    - name: redis-port
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
+
+---
+
+# MsSQL Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: mssql-service
+  namespace: projet
+spec:
+  selector:
+    app: mssql
+  ports:
+    - name: mssql-port
+      port: 1433
+      targetPort: 1433
+  type: ClusterIP
+
+---
+
+# WEB Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: web-service
+  namespace: projet
+spec:
+  selector:
+    app: webmvc 
+  ports:
+    - name: webmc-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+
+# Applicants Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: applicants-service
+  namespace: projet
+spec:
+  selector:
+    app: applicants 
+  ports:
+    - name: applicants-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+
+# Jobs Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: jobs-service
+  namespace: projet
+spec:
+  selector:
+    app: jobs
+  ports:
+    - name: jobs-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+
+---
+
+# Identity Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: identity-service
+  namespace: projet
+spec:
+  selector:
+    app: identity
+  ports:
+    - name: identity-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
