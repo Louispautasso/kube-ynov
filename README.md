@@ -58,6 +58,27 @@ Puis on lance l'installation du Chart Helm avec notre fichier de valeurs et dans
 helm install prometheus prometheus-community/kube-prometheus-stack -f helm-charts/prometheus/values.yml --namespace monitoring
 ```
 
+## Installation du monitoring des logs - EFK
+
+On commence par créer son namespace
+```bash
+kubectl create namespace kube-logging
+```
+
+Puis on lance l'installation du Chart Helm  d'ElasticSearch dans le namespace kube-logging
+```bash
+helm install elasticsearch ./helm-charts/elasticsearch --namespace kube-logging
+```
+
+Puis on lance l'installation du Chart Helm  de Kibana dans le namespace kube-logging
+```bash
+helm install kibana ./helm-charts/kibana --namespace kube-logging
+```
+
+Puis on lance l'installation du Chart Helm de Fluentd dans le namespace kube-logging
+```bash
+helm install fluentd ./helm-charts/fluentd --namespace kube-logging
+```
 
 
 ## Contributing
