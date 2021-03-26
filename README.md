@@ -67,8 +67,16 @@ On commence par créer son namespace
 ```bash
 kubectl create namespace kube-logging
 ```
+### Single Commande
 
 Puis on lance l'installation du Chart Helm  d'ElasticSearch dans le namespace kube-logging
+```bash
+helm install elasticsearch ./helm-charts/efk --namespace kube-logging
+```
+
+### Pleins de commande
+
+On lance l'installation du Chart Helm  d'ElasticSearch dans le namespace kube-logging
 ```bash
 helm install elasticsearch ./helm-charts/elasticsearch --namespace kube-logging
 ```
