@@ -87,6 +87,7 @@ helm install fluentd ./helm-charts/fluentd --namespace kube-logging
 kubectl create secret tls projet-1 --cert certificats/projet-1.crt --key certificats/projet-1.key
 ```
 
+
 # Pour les noobs
 # Quelques commandes
 Voir les releases qui tournent actuellement et les supprimer
