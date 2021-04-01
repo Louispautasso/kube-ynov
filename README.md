@@ -4,6 +4,8 @@ Ce repo est la partie Helm pour avoir un déploiement plus simple et plus rapide
 
 Le repo de base et où tout se lance à la mano est ici : https://github.com/Louispautasso/kube-groupe4
 
+La registry docker pour l'ensemble (ou presque) des images utilisé dans ce projet :https://hub.docker.com/orgs/groupe4ynov/repositories
+
 Ce projet a été créer dans le but de fonctionner sur un Cluster Kubernetes. Ce cluster pourra être installer sur un cloud provider comme sur un cluster kube local.
 
 ![Diagramme des flux](https://github.com/Louispautasso/kube-ynov/blob/main/other/diagramme.png?raw=true)
