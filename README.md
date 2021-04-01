@@ -94,7 +94,7 @@ kubectl create namespace kube-logging
 
 Puis on lance l'installation du Chart Helm  d'ElasticSearch dans le namespace kube-logging
 ```bash
-helm install elasticsearch ./helm-charts/efk --namespace kube-logging
+helm install efk ./helm-charts/efk --namespace kube-logging
 ```
 
 ### OOUUU en Pleins de commande
