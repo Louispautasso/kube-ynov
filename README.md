@@ -44,9 +44,19 @@ On commence par créer son namespace
 kubectl create namespace projet
 ```
 
+On install le certificat auto-signé
+```bash
+kubectl create secret tls projet-1 --cert certificats/projet-1.crt --key certificats/projet-1.key
+```
+
 Puis on installe l'ensemble du projet via la commande helm 
 ```bash
 helm install projet ./helm-charts/projet --namespace projet
+```
+
+Ajouter le vhost dans le fichier /etc/hosts avec l'ip de votre ingress
+```bash
+20.74.17.236 siteweb.example.com
 ```
 
 ## Installation du monitoring des metrics - Prometheus / Grafana
@@ -65,6 +75,11 @@ helm repo update
 Puis on lance l'installation du Chart Helm avec notre fichier de valeurs et dans le namespace qu'on souhaite
 ```bash
 helm install prometheus prometheus-community/kube-prometheus-stack -f helm-charts/prometheus/values.yml --namespace monitoring
+```
+
+Ajouter le vhost dans le fichier /etc/hosts avec l'ip de votre ingress
+```bash
+20.74.17.236 grafana.example.com
 ```
 
 ## Installation du monitoring des logs - EFK
@@ -97,12 +112,10 @@ Puis on lance l'installation du Chart Helm de Fluentd dans le namespace kube-log
 helm install fluentd ./helm-charts/fluentd --namespace kube-logging
 ```
 
-## Installation du certificat auto-signé
-
+Ajouter le vhost dans le fichier /etc/hosts avec l'ip de votre ingress
 ```bash
-kubectl create secret tls projet-1 --cert certificats/projet-1.crt --key certificats/projet-1.key
+20.74.17.236 kibana.example.com
 ```
-
 
 # Pour les noobs
 # Quelques commandes
